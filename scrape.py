@@ -1,5 +1,6 @@
 from selenium import webdriver
 from time import sleep
+import csv
 
 class Company_Scrape:
     def __init__(self):
@@ -23,24 +24,60 @@ class Company_Scrape:
     def more_click(self):
         while True:
             try:
+                sleep(5)
                 element=self.driver.find_element_by_xpath(self.more_xpath)
                 element.click()
-            except:
-                sleep(12)
-                self.driver.get(self.url)
-                self.run()
-            if element:
-                yield True
-            else:
+            except Exception as e:
+                print(e)
                 break
 
     def get_header(self):
-        pass
+        header_element = self.driver.find_elements_by_xpath(self.header_xpath)
+        header_text = [header.text for header in header_element if not header.text=='']
+        with open('data.csv','w') as csvfile:
+            writer = csv.writer(csvfile)
+            writer.writerow(header_text)
+        return header_text
+
+    def table_data(self):
+        company_element = self.driver.find_elements_by_xpath(self.company_name_xpath)
+        companies = [company.text for company in company_element]
+        header_text = self.get_header()
+        rest_of_value_elements = self.driver.find_elements_by_xpath(self.table_xpath)
+        rest_of_value = [data.text for data in rest_of_value_elements]
+
+        table_data = []
+        upper_length = len(rest_of_value)-len(header_text)
+        low=0
+        high=len(header_text)-1
+
+        for company in companies:
+            temp=[]
+            while( high <= upper_length ):
+                temp=rest_of_value[low:high]
+                temp.insert(0,company)
+                table_data.append(temp)
+                low=high
+                high+=high+1
+                with open ('data.csv','a') as csvfile:
+                    writer=csv.writer(csvfile)
+                    writer.writerow(table_data)
+                temp.clear()
+                
+            #print(table_data)
+
 
     def run(self):
-        self.driver.get(self.url)
-        self.captcha_solve()
-        self.more_click()
-        self.driver.quit()
+        try:
+            self.driver.get(self.url)
+            self.captcha_solve()
+            self.more_click()
+            self.table_data()
+            
+        except:
+            self.driver.quit()
+            raise
+        finally:
+            self.driver.quit()
 
 Company_Scrape().run()
