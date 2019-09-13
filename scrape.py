@@ -14,17 +14,19 @@ class Company_Scrape:
         #check for is header path is >=9 or not
         self.header_xpath="//div[@class='base header']//div"
         self.all_value_except_company="//div[@class='value']"
+        self.filename = 'firstpage.csv'
         
     def captcha_solve(self):
         try:
             element=self.driver.find_element_by_xpath(self.captcha_xpath)
+            element.click()
         except:
             self.more_click()
 
     def more_click(self):
         while True:
             try:
-                sleep(5)
+                sleep(4)
                 element=self.driver.find_element_by_xpath(self.more_xpath)
                 element.click()
             except Exception as e:
@@ -41,33 +43,31 @@ class Company_Scrape:
 
     def table_data(self):
         company_element = self.driver.find_elements_by_xpath(self.company_name_xpath)
-        companies = [company.text for company in company_element]
+        companies = [company.get_attribute('href') for company in company_element]
+        print(companies)
         header_text = self.get_header()
-        rest_of_value_elements = self.driver.find_elements_by_xpath(self.table_xpath)
+        
+        header_text.insert(1,'Tagline')
+        header_text.remove('Signal')
+        
+        rest_of_value_elements = self.driver.find_elements_by_xpath("//div[@class='base startup']")
         rest_of_value = [data.text for data in rest_of_value_elements]
+        datadict=[dict(zip(header_text, data.split('\n'))) for data in rest_of_value]
+        
 
-        table_data = []
-        upper_length = len(rest_of_value)-len(header_text)
-        low=0
-        high=len(header_text)-1
+        with open(self.filename, 'w', newline='') as csvfile:
+            writer = csv.DictWriter(csvfile, fieldnames=header_text)
+            writer.writeheader()
 
-        for company in companies:
-            temp=[]
-            while( high <= upper_length ):
-                temp=rest_of_value[low:high]
-                temp.insert(0,company)
-                table_data.append(temp)
-                low=high
-                high+=high+1
-                with open ('data.csv','a') as csvfile:
-                    writer=csv.writer(csvfile)
-                    writer.writerow(table_data)
-                temp.clear()
-                
-            #print(table_data)
+        for data in datadict:
+            with open(self.filename, 'a', newline='') as csvfile:
+                writer = csv.DictWriter(csvfile, fieldnames=header_text)
+                writer.writerow(data)
+        
 
 
     def run(self):
+        urllist=[]
         try:
             self.driver.get(self.url)
             self.captcha_solve()
