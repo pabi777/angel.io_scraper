@@ -43,28 +43,36 @@ class Company_Scrape:
 
     def table_data(self):
         company_element = self.driver.find_elements_by_xpath(self.company_name_xpath)
-        companies = [company.get_attribute('href') for company in company_element]
-        print(companies)
+        companies = [(company.text,company.get_attribute('href')) for company in company_element]
+        #print(companies)
         header_text = self.get_header()
-        
-        header_text.insert(1,'Tagline')
-        header_text.remove('Signal')
-        
-        rest_of_value_elements = self.driver.find_elements_by_xpath("//div[@class='base startup']")
-        rest_of_value = [data.text for data in rest_of_value_elements]
-        datadict=[dict(zip(header_text, data.split('\n'))) for data in rest_of_value]
+        header_text.insert(1,'Url')
         
 
         with open(self.filename, 'w', newline='') as csvfile:
             writer = csv.DictWriter(csvfile, fieldnames=header_text)
             writer.writeheader()
-
-        for data in datadict:
-            with open(self.filename, 'a', newline='') as csvfile:
-                writer = csv.DictWriter(csvfile, fieldnames=header_text)
-                writer.writerow(data)
         
-
+        rest_of_value_elements = self.driver.find_elements_by_xpath(self.all_value_except_company)
+        rest_of_value = [data.text for data in rest_of_value_elements]
+        high,low,i=10,0,0
+        #lenth_of_data=len(rest_of_value)
+        while True:
+            try:
+                line=rest_of_value[low:high]
+                line.insert(0,companies[i][0])
+                line.insert(1,companies[i][1])
+                datadict=dict(zip(header_text,line))
+                print(datadict)
+                with open(self.filename, 'a', newline='') as csvfile:
+                    writer = csv.DictWriter(csvfile, fieldnames=header_text)
+                    writer.writerow(datadict)
+            except Exception as e:
+                print(e)
+                break
+            i+=1
+            low=high
+            high+=high
 
     def run(self):
         urllist=[]
