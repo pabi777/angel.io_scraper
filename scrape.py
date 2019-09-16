@@ -1,12 +1,18 @@
 from selenium import webdriver
 from time import sleep
 import csv
-from page2.Details_Scrape import do
+from page2 import Details_Scrape
+from pyvirtualdisplay import Display
+from sys import argv
 
 class Company_Scrape:
     def __init__(self):
         self.url='https://angel.co/companies'
-        self.driver=webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')
+        #PROXY = '80.191.174.220:8080'
+        #chrome_options = webdriver.ChromeOptions()
+        #chrome_options.add_argument('--proxy-server=%s' % PROXY)
+        self.driver=webdriver.Chrome('/usr/lib/chromium-browser/chromedriver')#,options=chrome_options)
+        self.driver.set_window_size(1920,1080)
         self.captcha_xpath="//iframe"
         #do it while more is present!!
         self.more_xpath="//div[@class='more']"
@@ -27,59 +33,24 @@ class Company_Scrape:
     def more_click(self):
         while True:
             try:
-                sleep(4)
+                sleep(5)
                 element=self.driver.find_element_by_xpath(self.more_xpath)
                 element.click()
             except Exception as e:
                 print(e)
                 break
 
-    def get_header(self):
-        header_element = self.driver.find_elements_by_xpath(self.header_xpath)
-        header_text = [header.text for header in header_element if not header.text=='']
-        with open(self.filename,'w') as csvfile:
-            writer = csv.writer(csvfile)
-            writer.writerow(header_text)
-        return header_text
-
     def table_data(self):
         company_element = self.driver.find_elements_by_xpath(self.company_name_xpath)
-        companies = [(company.text,company.get_attribute('href')) for company in company_element]
-        
-        header_text = self.get_header()
-        header_text.insert(1,'Url')
-        
+        company_list=[]
+        for company in company_element:
+            tup=(company.text,company.get_attribute('href'))
+            company_list.append(tup)
 
-        with open(self.filename, 'w', newline='') as csvfile:
-            writer = csv.DictWriter(csvfile, fieldnames=header_text)
-            writer.writeheader()
-        
-        rest_of_value_elements = self.driver.find_elements_by_xpath(self.all_value_except_company)
-        rest_of_value = [data.text for data in rest_of_value_elements]
-        high,low,i=10,0,0
-        lenth_of_data=len(rest_of_value)
-        header_length=len(header_text)
-        print('header text length',header_length)
-        while True:
-            try:
-                print(i,low,high)
-                line=rest_of_value[low:high]
-                line.insert(0,companies[i][0])
-                line.insert(1,companies[i][1])
-                
-                datadict=dict(zip(header_text,line))
-                #print(datadict)
-                with open(self.filename, 'a', newline='') as csvfile:
-                    writer = csv.DictWriter(csvfile, fieldnames=header_text)
-                    writer.writerow(datadict)
-                
-            except Exception as e:
-                print(e)
-                break
-            finally:
-                i+=1
-                low=high
-                high+=header_length
+        details_scrape=Details_Scrape()
+        details_scrape.setdata(company_list,self.driver)
+        details_scrape.company_details()
+            
 
     def run(self):
         urllist=[]
@@ -95,4 +66,20 @@ class Company_Scrape:
         finally:
             self.driver.quit()
 
-Company_Scrape().run()
+if __name__ == '__main__':
+
+    
+    if '--not-headless' in argv:
+        HEADLESS = False
+    else:
+        HEADLESS = True
+
+    if HEADLESS:
+        disp = Display(visible=0, size=(1920,1080))
+        disp.start()
+
+    Company_Scrape().run()
+    if HEADLESS:
+        disp.stop()
+
+
