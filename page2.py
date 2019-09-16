@@ -77,7 +77,7 @@ class Details_Scrape:
         try:
             self.get_url(url+'/funding')
             investors_name_element=self.driver.find_elements_by_xpath(self.investors)
-            investors_name=[self.company_dict.update({'investors':name.text}) for name in investors_name_element ]
+            investors_name=[self.company_dict.update({name.text:'investors'}) for name in investors_name_element ]
         except Exception as e:
             print(e)
 
