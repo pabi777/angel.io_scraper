@@ -1,6 +1,7 @@
 from selenium import webdriver
 from time import sleep
 import csv
+from page2.Details_Scrape import do
 
 class Company_Scrape:
     def __init__(self):
@@ -36,7 +37,7 @@ class Company_Scrape:
     def get_header(self):
         header_element = self.driver.find_elements_by_xpath(self.header_xpath)
         header_text = [header.text for header in header_element if not header.text=='']
-        with open('data.csv','w') as csvfile:
+        with open(self.filename,'w') as csvfile:
             writer = csv.writer(csvfile)
             writer.writerow(header_text)
         return header_text
@@ -44,7 +45,7 @@ class Company_Scrape:
     def table_data(self):
         company_element = self.driver.find_elements_by_xpath(self.company_name_xpath)
         companies = [(company.text,company.get_attribute('href')) for company in company_element]
-        #print(companies)
+        
         header_text = self.get_header()
         header_text.insert(1,'Url')
         
@@ -56,23 +57,29 @@ class Company_Scrape:
         rest_of_value_elements = self.driver.find_elements_by_xpath(self.all_value_except_company)
         rest_of_value = [data.text for data in rest_of_value_elements]
         high,low,i=10,0,0
-        #lenth_of_data=len(rest_of_value)
+        lenth_of_data=len(rest_of_value)
+        header_length=len(header_text)
+        print('header text length',header_length)
         while True:
             try:
+                print(i,low,high)
                 line=rest_of_value[low:high]
                 line.insert(0,companies[i][0])
                 line.insert(1,companies[i][1])
+                
                 datadict=dict(zip(header_text,line))
-                print(datadict)
+                #print(datadict)
                 with open(self.filename, 'a', newline='') as csvfile:
                     writer = csv.DictWriter(csvfile, fieldnames=header_text)
                     writer.writerow(datadict)
+                
             except Exception as e:
                 print(e)
                 break
-            i+=1
-            low=high
-            high+=high
+            finally:
+                i+=1
+                low=high
+                high+=header_length
 
     def run(self):
         urllist=[]
