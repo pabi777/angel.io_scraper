@@ -4,7 +4,7 @@ import csv
 from page2 import Details_Scrape
 from pyvirtualdisplay import Display
 from sys import argv
-from cityscrape import makeurl
+from cityscrape import *
 
 class Company_Scrape:
     def __init__(self,url,*args,**kwargs):

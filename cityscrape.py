@@ -1,4 +1,3 @@
-from scrape import Company_Scrape
 from selenium import webdriver
 
 def driver_init(proxy=False):
