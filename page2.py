@@ -40,7 +40,7 @@ class Details_Scrape:
             writer.writeheader()
 
 
-    def csv_row_writer(self,filename='data.json'):
+    def csv_row_writer(self,filename='US.json'):
         if not os.path.isfile(filename):
             with open(filename, 'w') as txtfile:
                 pass

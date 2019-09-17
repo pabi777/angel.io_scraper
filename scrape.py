@@ -4,10 +4,11 @@ import csv
 from page2 import Details_Scrape
 from pyvirtualdisplay import Display
 from sys import argv
+from cityscrape import makeurl
 
 class Company_Scrape:
-    def __init__(self):
-        self.url='https://angel.co/companies'
+    def __init__(self,url,*args,**kwargs):
+        self.url=url#'https://angel.co/companies'
         #PROXY = '80.191.174.220:8080'
         #chrome_options = webdriver.ChromeOptions()
         #chrome_options.add_argument('--proxy-server=%s' % PROXY)
@@ -21,7 +22,7 @@ class Company_Scrape:
         #check for is header path is >=9 or not
         self.header_xpath="//div[@class='base header']//div"
         self.all_value_except_company="//div[@class='value']"
-        self.filename = 'firstpage.csv'
+        
         
     def captcha_solve(self):
         try:
@@ -53,7 +54,7 @@ class Company_Scrape:
             
 
     def run(self):
-        urllist=[]
+        
         try:
             self.driver.get(self.url)
             self.captcha_solve()
@@ -67,7 +68,16 @@ class Company_Scrape:
             self.driver.quit()
 
 if __name__ == '__main__':
-
+    xpath_dict={'cities':"//ul[@class='with-dots']//li//div//a"}
+    base_url='https://angel.co/companies?keywords='
+    url='https://www.britannica.com/topic/list-of-cities-and-towns-in-the-United-States-2023068'
+    data=makeurl(xpath_dict,url,base_url)
+    
+    urllist=[
+        'https://angel.co/companies?company_types[]=Startup',
+        'https://angel.co/companies?company_types[]=Private+Company',
+        ]
+    urllist+=data
     
     if '--not-headless' in argv:
         HEADLESS = False
@@ -77,8 +87,8 @@ if __name__ == '__main__':
     if HEADLESS:
         disp = Display(visible=0, size=(1920,1080))
         disp.start()
-
-    Company_Scrape().run()
+    for url in urllist:
+        Company_Scrape(url).run()
     if HEADLESS:
         disp.stop()
 
