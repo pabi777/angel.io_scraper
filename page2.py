@@ -58,7 +58,7 @@ class Details_Scrape:
         designation_element=self.driver.find_elements_by_xpath(self.designation_xpath)
         datadict=dict(zip([ele.text for ele in employe_element],[ele.text for ele in designation_element]))
         self.company_dict.update(datadict)
-        print(self.company_dict)
+        #print(self.company_dict)
 
     def company_details(self):
         try:
