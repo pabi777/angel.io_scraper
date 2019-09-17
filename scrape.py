@@ -68,6 +68,16 @@ class Company_Scrape:
             self.driver.quit()
 
 if __name__ == '__main__':
+    
+    
+    if '--not-headless' in argv:
+        HEADLESS = False
+    else:
+        HEADLESS = True
+
+    if HEADLESS:
+        disp = Display(visible=0, size=(1920,1080))
+        disp.start()
     xpath_dict={'cities':"//ul[@class='with-dots']//li//div//a"}
     base_url='https://angel.co/companies?keywords='
     url='https://www.britannica.com/topic/list-of-cities-and-towns-in-the-United-States-2023068'
@@ -78,15 +88,6 @@ if __name__ == '__main__':
         'https://angel.co/companies?company_types[]=Private+Company',
         ]
     urllist+=data
-    
-    if '--not-headless' in argv:
-        HEADLESS = False
-    else:
-        HEADLESS = True
-
-    if HEADLESS:
-        disp = Display(visible=0, size=(1920,1080))
-        disp.start()
     for url in urllist:
         Company_Scrape(url).run()
     if HEADLESS:
