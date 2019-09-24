@@ -10,6 +10,9 @@ def driver_init(proxy=False):
     return driver
 
 def scrape(xpath_dict,url):
+    '''
+        returns dict
+    '''
     driver=driver_init()
     driver.get(url)
     datadict={}
@@ -21,10 +24,22 @@ def scrape(xpath_dict,url):
     return datadict
 
 def makeurl(xpath_dict,url,baseurl):
+    '''
+        returns list
+    '''
     data=scrape(xpath_dict,url)
     for key in data:
         urls=[ baseurl+keyword.replace(' ','+') for keyword in data[key] ]
     return urls
 
 
+
+if __name__=='__main__':
+    xpath_dict = {'cities':'//tbody//tr//td[1]'}
+    url = 'http://worldpopulationreview.com/continents/cities-in-europe/'
+    baseurl = 'https://angel.co/companies?keywords='
+    data = makeurl(xpath_dict,url,baseurl)
+    print(data)
+    print(len(data))
+    
 

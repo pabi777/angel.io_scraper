@@ -78,18 +78,24 @@ if __name__ == '__main__':
     if HEADLESS:
         disp = Display(visible=0, size=(1920,1080))
         disp.start()
-    xpath_dict={'cities':"//ul[@class='with-dots']//li//div//a"}
-    base_url='https://angel.co/companies?keywords='
-    url='https://www.britannica.com/topic/list-of-cities-and-towns-in-the-United-States-2023068'
-    data=makeurl(xpath_dict,url,base_url)
-    
-    urllist=[
-        'https://angel.co/companies?company_types[]=Startup',
-        'https://angel.co/companies?company_types[]=Private+Company',
-        ]
-    urllist+=data
+
+    xpath_dict = {'cities':'//tbody//tr//td[1]'}
+    url = 'http://worldpopulationreview.com/continents/cities-in-europe/'
+    baseurl = 'https://angel.co/companies?keywords='
+    urllist = makeurl(xpath_dict,url,baseurl)
     for url in urllist:
         Company_Scrape(url).run()
+    # xpath_dict={'cities':"//ul[@class='with-dots']//li//div//a"}
+    # base_url='https://angel.co/companies?keywords='
+    # url='https://www.britannica.com/topic/list-of-cities-and-towns-in-the-United-States-2023068'
+    # data=makeurl(xpath_dict,url,base_url)
+    
+    # urllist=[
+    #     'https://angel.co/companies?company_types[]=Startup',
+    #     'https://angel.co/companies?company_types[]=Private+Company',
+    #     ]
+    # urllist+=data
+    
     if HEADLESS:
         disp.stop()
 

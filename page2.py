@@ -17,14 +17,17 @@ class Details_Scrape:
         self.investors="//h4[@class='__halo_textContrast_dark_AAAA __halo_fontSizeMap_size--lg __halo_fontWeight_medium styles_component__1kg4S name_9d036']//a"
         self.table_keys="//dd"
         self.table_values="//dt"
+        filename='Europe.json'
         for company,url in company_tups:
             self.get_url(url)
             self.company_dict.update({'company':company})
             self.company_details()
             self.people(url)
             self.investors_fetch(url)
-            self.csv_row_writer()
+            self.csv_row_writer(filename)
             self.company_dict.clear()
+        with open(filename, 'w') as txtfile:
+            txtfile.write(']')
             
             
     def get_url(self,url):
@@ -40,14 +43,15 @@ class Details_Scrape:
             writer.writeheader()
 
 
-    def csv_row_writer(self,filename='US.json'):
-        if not os.path.isfile(filename):
+    def csv_row_writer(self,filename='Europe.json'):
+        if not os.path.isfile(filename) or os.stat(filename).st_size == 0 :
             with open(filename, 'w') as txtfile:
-                pass
+                txtfile.write('[')
             
         with open(filename, 'a') as txtfile:
             jsondata=json.dumps(self.company_dict,indent=4)
             json.dump(jsondata,txtfile)
+            txtfile.write(',')
             
             
 
@@ -77,7 +81,8 @@ class Details_Scrape:
         try:
             self.get_url(url+'/funding')
             investors_name_element=self.driver.find_elements_by_xpath(self.investors)
-            investors_name=[self.company_dict.update({name.text:'investors'}) for name in investors_name_element ]
+            investors_list=[investor.text for investor in investors_name_element]
+            self.company_dict.update({'investors':investors_list})
         except Exception as e:
             print(e)
 
